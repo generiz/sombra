@@ -37,16 +37,9 @@ pub struct SimulationReport {
     pub by_transport: BTreeMap<String, usize>,
 }
 
+#[derive(Default)]
 pub struct Simulator {
     policy: RoutingPolicy,
-}
-
-impl Default for Simulator {
-    fn default() -> Self {
-        Self {
-            policy: RoutingPolicy::default(),
-        }
-    }
 }
 
 impl Simulator {

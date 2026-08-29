@@ -1,0 +1,8 @@
+{
+  "nodes": 120,
+  "messages": 10000,
+  "infrastructure_outage": 0.83,
+  "short_range_density": 0.58,
+  "long_range_coverage": 0.64,
+  "seed": 42
+}

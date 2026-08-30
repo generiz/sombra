@@ -1,6 +1,6 @@
 [package]
 name = "sombra"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "Resilient multi-transport messaging research prototype for degraded and off-grid networks"
 license = "MIT"

@@ -245,21 +245,24 @@ mod tests {
     use std::time::Duration;
 
     fn bundle(priority: Priority) -> Bundle {
-        Bundle::new(b"opaque-test-envelope", Duration::from_secs(60), 4, priority)
+        Bundle::new(
+            b"opaque-test-envelope",
+            Duration::from_secs(60),
+            4,
+            priority,
+        )
     }
 
     #[test]
     fn queue_orders_priority_and_removes_delivered_bundle() {
         let path = test_path("queue-order");
+        cleanup(&path);
         let mut store = BundleStore::load_with_limit(&path, 8).unwrap();
         let routine = bundle(Priority::Routine);
         let urgent = bundle(Priority::Urgent);
         let now = routine.created_at_ms.max(urgent.created_at_ms);
 
-        assert_eq!(
-            store.enqueue(routine, vec![1], now),
-            EnqueueOutcome::Stored
-        );
+        assert_eq!(store.enqueue(routine, vec![1], now), EnqueueOutcome::Stored);
         assert_eq!(
             store.enqueue(urgent.clone(), vec![2], now),
             EnqueueOutcome::Stored
@@ -274,12 +277,13 @@ mod tests {
             AttemptOutcome::Delivered
         );
         assert!(!store.contains(&urgent.id));
-        let _ = fs::remove_file(path);
+        cleanup(&path);
     }
 
     #[test]
     fn failed_delivery_uses_bounded_backoff() {
         let path = test_path("backoff");
+        cleanup(&path);
         let mut store = BundleStore::load_with_limit(&path, 8).unwrap();
         let item = bundle(Priority::Important);
         let now = item.created_at_ms;
@@ -295,12 +299,13 @@ mod tests {
         );
         assert!(store.ready(now + 1, 1).is_empty());
         assert_eq!(store.ready(now + BASE_RETRY_MS, 1).len(), 1);
-        let _ = fs::remove_file(path);
+        cleanup(&path);
     }
 
     #[test]
     fn persistence_round_trip_preserves_envelope_and_attempt_state() {
         let path = test_path("roundtrip");
+        cleanup(&path);
         let id;
         let now;
         {
@@ -317,29 +322,30 @@ mod tests {
         let restored = store.get(&id).unwrap();
         assert_eq!(restored.envelope, vec![4, 5, 6]);
         assert_eq!(restored.attempts, 1);
-        let _ = fs::remove_file(path);
+        cleanup(&path);
     }
 
     #[test]
     fn capacity_is_bounded() {
         let path = test_path("capacity");
+        cleanup(&path);
         let mut store = BundleStore::load_with_limit(&path, 1).unwrap();
         let a = bundle(Priority::Routine);
         let now = a.created_at_ms;
-        let mut b = bundle(Priority::Urgent);
-        b.id.push('x');
+        let b = bundle(Priority::Urgent);
 
         assert_eq!(store.enqueue(a, vec![1], now), EnqueueOutcome::Stored);
         assert_eq!(store.enqueue(b, vec![2], now), EnqueueOutcome::Full);
         assert_eq!(store.len(), 1);
-        let _ = fs::remove_file(path);
+        cleanup(&path);
     }
 
     fn test_path(name: &str) -> PathBuf {
-        std::env::temp_dir().join(format!(
-            "sombra-{name}-{}-{}.json",
-            std::process::id(),
-            std::thread::current().name().unwrap_or("test")
-        ))
+        std::env::temp_dir().join(format!("sombra-{name}-{}.json", std::process::id()))
+    }
+
+    fn cleanup(path: &Path) {
+        let _ = fs::remove_file(path);
+        let _ = fs::remove_file(temporary_path(path));
     }
 }

@@ -33,7 +33,7 @@ enum QueueCommand {
         file: PathBuf,
         #[arg(long)]
         envelope: PathBuf,
-        #[arg(long, value_enum, default_value_t = PriorityArg::Routine)]
+        #[arg(long, value_enum, default_value = "routine")]
         priority: PriorityArg,
         #[arg(long, default_value_t = 86_400)]
         ttl_secs: u64,

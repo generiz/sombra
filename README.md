@@ -39,6 +39,12 @@ Implemented:
 - terminal workflow for the local DTN queue
 - cross-platform CI on Linux, Windows and macOS
 
+## Interactive demonstrator
+
+A browser demonstrator is available at https://nicolaspintos.com/sombra/.
+
+It mirrors the current `RoutingPolicy` scoring weights and illustrates TTL, priority, queueing and bounded retry behavior. The displayed nodes, radio links, contact windows and animation timings are simulated; the page is not connected to a live Sombra radio network.
+
 ## Simulation
 
 ```bash
